@@ -2,7 +2,7 @@ module Types exposing (..)
 
 import Json.Encode as Json
 import String
-import Native.Types
+-- import Native.Types
 
 
 type KnownTypes
