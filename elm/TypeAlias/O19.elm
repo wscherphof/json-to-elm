@@ -20,9 +20,6 @@ formatDecoderField field =
 formatPipelineDecoderField : Field -> String
 formatPipelineDecoderField field =
     let
-        _ =
-            Debug.log "field" field
-
         decoder =
             Types.knownTypesToString field.typeName
                 |> String.split " "
