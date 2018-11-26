@@ -1,14 +1,14 @@
 module Main exposing (..)
 
-import Home exposing (model, update, view)
+import Home exposing (defaultModel, update, view, subscriptions)
 import Html
 
 
 main : Program Never Home.Model Home.Action
 main =
     Html.program
-        { init = ( model, Cmd.none )
+        { init = ( defaultModel, Cmd.none )
         , view = view
         , update = update
-        , subscriptions = (\_ -> Sub.none)
+        , subscriptions = subscriptions
         }

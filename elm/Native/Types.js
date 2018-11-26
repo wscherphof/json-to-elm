@@ -50,11 +50,21 @@ var _eeue56$json_to_elm$Native_Types = (function(){
         return 'Unknown';
     };
 
-    var toValue = function(text){
+    var toValue = function(obj){
+        var stuff;
         try {
-            return JSON.parse(text);
+            stuff = JSON.parse(obj.text);
         } catch (e) {
-            return {};
+            stuff = {};
+        }
+        return {
+            stuff: stuff,
+            fields: [{
+                name: obj.aliasName,
+                base: "",
+                typeName: "Something",
+                value: stuff
+            }].concat(fields(stuff, obj.aliasName))
         }
     };
 
@@ -71,6 +81,27 @@ var _eeue56$json_to_elm$Native_Types = (function(){
 
     var keys = function(obj){
         return fromArray(Object.keys(obj));
+    };
+
+    var fields = function(obj, base){
+        list = [];
+        Object.keys(obj).forEach(function(key){
+            var value = obj[key];
+            var name = makeGuessAtType(value);
+            var newBase = base + key;
+            var field = {
+                base: base.trim(),
+                name: key.trim(),
+                typeName: name,
+                value: value
+            };
+            if (name === "Something") {
+                list.concat(fields(value, newBase));
+            } else {
+                list.push(field);
+            }
+        });
+        return fromArray(list);
     };
 
     var get = function(name, obj){

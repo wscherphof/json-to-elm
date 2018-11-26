@@ -3,55 +3,14 @@ module Main exposing (..)
 import Browser
 import Html exposing (Html, text, div, h1, img)
 import Html.Attributes exposing (src)
-import Home exposing (model, update, view)
+import Home exposing (defaultModel, update, view, subscriptions)
 
 
----- MODEL ----
-
-
-type alias Model =
-    {}
-
-
-init : ( Model, Cmd Msg )
-init =
-    ( {}, Cmd.none )
-
-
-
----- UPDATE ----
-
-
-type Msg
-    = NoOp
-
-
-update : Msg -> Model -> ( Model, Cmd Msg )
-update msg model =
-    ( model, Cmd.none )
-
-
-
----- VIEW ----
-
-
-view : Model -> Html Msg
-view model =
-    div []
-        [ img [ src "/logo.svg" ] []
-        , h1 [] [ text "Your Elm App is really working!" ]
-        ]
-
-
-
----- PROGRAM ----
-
-
-main : Program () Model Msg
+main : Program () Home.Model Home.Action
 main =
     Browser.element
         { view = view
-        , init = \_ -> init
+        , init = \_ -> ( defaultModel, Cmd.none )
         , update = update
-        , subscriptions = always Sub.none
+        , subscriptions = subscriptions
         }

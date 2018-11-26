@@ -2,7 +2,6 @@ module Types exposing (..)
 
 import Json.Encode as Json
 import String
--- import Native.Types
 
 
 type KnownTypes
@@ -115,34 +114,3 @@ knownTypesToEnglish known =
 
         MaybeType nested ->
             "an optional value of " ++ (knownTypesToString nested)
-
-
-suggestType : Json.Value -> KnownTypes
-suggestType value =
-    Native.Types.makeGuessAtType value
-        |> typeToKnownTypes
-
-
-toValue : String -> Json.Value
-toValue =
-    Native.Types.toValue
-
-
-keys : Json.Value -> List String
-keys =
-    Native.Types.keys
-
-
-get : String -> Json.Value -> Maybe Json.Value
-get =
-    Native.Types.get
-
-
-unsafeGet : String -> Json.Value -> Json.Value
-unsafeGet =
-    Native.Types.unsafeGet
-
-
-unsafeEval : String -> String -> String -> String -> Json.Value -> Result String Json.Value
-unsafeEval aliasName constructorString decoderString encoderString testData =
-    Native.Types.unsafeEval aliasName constructorString decoderString encoderString testData
