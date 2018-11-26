@@ -1,7 +1,7 @@
 module TypeAlias exposing (..)
 
 import String
-import Regex exposing (..)
+import Regex exposing (Regex)
 import Types exposing (KnownTypes(..))
 import Json.Encode as Json
 
@@ -74,7 +74,7 @@ badCharsRegex =
 -}
 cleanString : String -> String
 cleanString name =
-    case split All badCharsRegex name of
+    case Regex.split badCharsRegex name of
         [] ->
             ""
 
@@ -125,38 +125,6 @@ aliasFormat alias =
             , joinedFields
             , "\n    }"
             ]
-
-
-generateFields : Json.Value -> String -> List Field
-generateFields stuff base =
-    Types.keys stuff
-        |> List.map
-            (\key ->
-                let
-                    value =
-                        Types.unsafeGet key stuff
-
-                    name =
-                        Types.suggestType value
-
-                    newBase =
-                        base
-                            ++ (capitalize key)
-                            |> capitalize
-
-                    field =
-                        { base = String.trim base
-                        , name = String.trim key
-                        , typeName = name
-                        , value = value
-                        }
-                in
-                    if name == ComplexType then
-                        generateFields value newBase ++ [ field ]
-                    else
-                        [ field ]
-            )
-        |> List.concat
 
 
 gatherAliases : List Field -> List Field
@@ -210,21 +178,9 @@ createTypeAlias knownNames fields field =
         }
 
 
-createTypeAliases : Json.Value -> String -> String -> List TypeAlias
-createTypeAliases stuff aliasName base =
+createTypeAliases : List Field -> List TypeAlias
+createTypeAliases fields =
     let
-        topLevel : Field
-        topLevel =
-            { name = aliasName
-            , base = ""
-            , typeName = ComplexType
-            , value = stuff
-            }
-
-        fields =
-            generateFields stuff aliasName
-                |> (::) topLevel
-
         creator field aliases =
             let
                 knownNames =
@@ -234,18 +190,21 @@ createTypeAliases stuff aliasName base =
                     createTypeAlias knownNames fields field
             in
                 alias :: aliases
-
-        aliases =
-            gatherAliases fields
-                |> resolveConflicts
-                |> List.foldl creator []
     in
-        aliases
+    gatherAliases fields
+        |> resolveConflicts
+        |> List.foldl creator []
 
 
 isAlreadyAName : String -> List TypeAlias -> Bool
 isAlreadyAName name aliases =
     List.member name (List.map .name aliases)
+
+
+regex : String -> Regex
+regex pattern =
+    Regex.fromString pattern
+        |> Maybe.withDefault Regex.never
 
 
 getTypeAliasName : String -> Maybe String
@@ -254,7 +213,7 @@ getTypeAliasName string =
         pattern =
             regex "type alias(.+)\\="
     in
-        case find (All) pattern string of
+        case Regex.find pattern string of
             [] ->
                 Nothing
 
@@ -262,23 +221,30 @@ getTypeAliasName string =
                 Just <| String.trim <| String.join "" <| List.map (Maybe.withDefault "") x.submatches
 
             _ ->
-                Debug.log "too much" Nothing
+                Nothing
 
 
 getFields : String -> List String
 getFields string =
     let
         withoutNewlines =
-            replace All (regex "\\n") (\_ -> "") string
+            Regex.replace (regex "\\n") (\_ -> "") string
 
         pattern =
             regex "\\{(.+)\\}"
     in
-        case find (All) pattern withoutNewlines of
+        case Regex.find pattern withoutNewlines of
             [] ->
-                Debug.log "no matches" []
+                []
 
             [ x ] ->
+                -- let
+                --     _ =
+                --         Debug.log "x" x
+
+                --     _ =
+                --         Debug.log "x.submatches" x.submatches
+                -- in
                 List.map (Maybe.withDefault "") x.submatches
                     |> List.map String.trim
                     |> String.join ""
@@ -286,7 +252,7 @@ getFields string =
                     |> List.map String.trim
 
             xs ->
-                Debug.log ("too many matches") []
+                []
 
 
 getFieldNameAndType : String -> Field

@@ -1,0 +1,15 @@
+{
+  "short_name": "json-to-elm",
+  "name": "Generate JSON decoders and encoders for Elm",
+  "icons": [
+    {
+      "src": "favicon.ico",
+      "sizes": "192x192",
+      "type": "image/png"
+    }
+  ],
+  "start_url": "./index.html",
+  "display": "standalone",
+  "theme_color": "#000000",
+  "background_color": "#ffffff"
+}

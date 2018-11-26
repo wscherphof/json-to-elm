@@ -1,8 +1,8 @@
-module TypeAlias.O18 exposing (..)
+module TypeAlias.O19 exposing (..)
 
-import Regex exposing (regex, replace)
+import Regex exposing (replace)
 import Types
-import TypeAlias exposing (TypeAlias, Field, capitalize, getFields, getTypeAliasName, getFieldNameAndType, prefixers, knownDecoders)
+import TypeAlias exposing (regex, TypeAlias, Field, capitalize, getFields, getTypeAliasName, getFieldNameAndType, prefixers, knownDecoders)
 
 
 formatDecoderField : Field -> String
@@ -20,9 +20,6 @@ formatDecoderField field =
 formatPipelineDecoderField : Field -> String
 formatPipelineDecoderField field =
     let
-        _ =
-            Debug.log "field" field
-
         decoder =
             Types.knownTypesToString field.typeName
                 |> String.split " "
@@ -55,7 +52,7 @@ createDecoder : String -> String
 createDecoder string =
     let
         withoutNewlines =
-            replace Regex.All (regex "\\n") (\_ -> "") string
+            replace (regex "\\n") (\_ -> "") string
 
         typeName =
             getTypeAliasName withoutNewlines
@@ -78,7 +75,7 @@ createDecoder string =
             if numberOfFields == 1 then
                 "map"
             else
-                "map" ++ (toString numberOfFields)
+                "map" ++ (String.fromInt numberOfFields)
     in
         if numberOfFields >= 7 then
             "import Json.Decode.Pipeline\n\n" ++ (createPipelineDecoder string)
@@ -103,7 +100,7 @@ createPipelineDecoder : String -> String
 createPipelineDecoder string =
     let
         withoutNewlines =
-            replace Regex.All (regex "\\n") (\_ -> "") string
+            replace (regex "\\n") (\_ -> "") string
 
         typeName =
             getTypeAliasName withoutNewlines
@@ -123,7 +120,7 @@ createPipelineDecoder string =
             , typeName
             , "\ndecode"
             , typeName
-            , " =\n    Json.Decode.Pipeline.decode "
+            , " =\n    Json.Decode.succeed "
             , typeName
             , "\n        "
             , fields
@@ -134,7 +131,7 @@ createEncoder : String -> String
 createEncoder string =
     let
         withoutNewlines =
-            replace Regex.All (regex "\\n") (\_ -> "") string
+            replace (regex "\\n") (\_ -> "") string
 
         typeName =
             getTypeAliasName withoutNewlines
@@ -250,7 +247,7 @@ runtimeCreateConstructor alias =
             if List.length alias.fields < 2 then
                 ""
             else
-                "F" ++ (toString <| List.length alias.fields) ++ "("
+                "F" ++ (String.fromInt <| List.length alias.fields) ++ "("
 
         functionWrapperEnd =
             if functionWrapper == "" then
