@@ -7,4 +7,5 @@ This project allows you to automate the creation of:
 - decoders from type aliases
 - encoders from type aliases
 
-You can run this program using `elm-app start`, or `elm-app build`
+You can run this program using `elm-app start`, or `elm-app build`.
+It's also live at https://json-to-elm-019.netlify.com/
