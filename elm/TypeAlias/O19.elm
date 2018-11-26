@@ -1,4 +1,4 @@
-module TypeAlias.O18 exposing (..)
+module TypeAlias.O19 exposing (..)
 
 import Regex exposing (replace)
 import Types
@@ -123,7 +123,7 @@ createPipelineDecoder string =
             , typeName
             , "\ndecode"
             , typeName
-            , " =\n    Json.Decode.Pipeline.decode "
+            , " =\n    Json.Decode.succeed "
             , typeName
             , "\n        "
             , fields

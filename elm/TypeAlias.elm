@@ -178,8 +178,8 @@ createTypeAlias knownNames fields field =
         }
 
 
-createTypeAliases : Json.Value -> List Field -> List TypeAlias
-createTypeAliases stuff fields =
+createTypeAliases : List Field -> List TypeAlias
+createTypeAliases fields =
     let
         creator field aliases =
             let
@@ -191,7 +191,7 @@ createTypeAliases stuff fields =
             in
                 alias :: aliases
     in
-    gatherAliases (Debug.log "fields" fields)
+    gatherAliases fields
         |> resolveConflicts
         |> List.foldl creator []
 
@@ -221,7 +221,7 @@ getTypeAliasName string =
                 Just <| String.trim <| String.join "" <| List.map (Maybe.withDefault "") x.submatches
 
             _ ->
-                Debug.log "too much" Nothing
+                Nothing
 
 
 getFields : String -> List String
@@ -235,7 +235,7 @@ getFields string =
     in
         case Regex.find pattern withoutNewlines of
             [] ->
-                Debug.log "no matches" []
+                []
 
             [ x ] ->
                 -- let
@@ -252,7 +252,7 @@ getFields string =
                     |> List.map String.trim
 
             xs ->
-                Debug.log ("too many matches") []
+                []
 
 
 getFieldNameAndType : String -> Field

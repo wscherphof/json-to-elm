@@ -8,8 +8,8 @@ var app = Elm.Main.init({
 
 registerServiceWorker();
 
-(function port_value() {
-  app.ports.toValue.subscribe(function(msg) {
+(function port_parse() {
+  app.ports.parse.subscribe(function(msg) {
     var stuff;
     try {
         stuff = JSON.parse(msg.text);
@@ -17,12 +17,9 @@ registerServiceWorker();
         stuff = {};
     }
 
-    var fields = generateFields(stuff, msg.aliasName);
-
-    app.ports.updateValue.send({
-      stuff: stuff,
-      fields: fields
-    });
+    app.ports.updateFields.send(
+      generateFields(stuff, msg.aliasName)
+    );
   });
 
   function capitalize (string) {

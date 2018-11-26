@@ -1,7 +1,7 @@
 port module Home exposing (..)
 
 import TypeAlias exposing (TypeAlias)
-import TypeAlias.O18
+import TypeAlias.O19
 import UnionType
 import Types
 import String
@@ -55,13 +55,13 @@ viewAllAliases version incoming decoder aliases =
             List.map TypeAlias.aliasFormat aliases
 
         decoderCreator =
-            TypeAlias.O18.createPipelineDecoder
+            TypeAlias.O19.createPipelineDecoder
 
         imports =
-            TypeAlias.O18.pipelineImports
+            TypeAlias.O19.pipelineImports
 
         encoder =
-            TypeAlias.O18.createEncoder
+            TypeAlias.O19.createEncoder
 
         extra =
             []
@@ -89,10 +89,10 @@ viewTypeAliasStuff : ElmVersion -> String -> Html Action
 viewTypeAliasStuff version incoming =
     let
         decoder =
-            TypeAlias.O18.createDecoder incoming
+            TypeAlias.O19.createDecoder incoming
 
         encoder =
-            TypeAlias.O18.createEncoder incoming
+            TypeAlias.O19.createEncoder incoming
 
         output =
             [ decoder
@@ -108,27 +108,6 @@ viewTypeAliasStuff version incoming =
             []
 
 
--- viewAllUnions : String -> Html Action
--- viewAllUnions union =
---     let
---         type_ =
---             UnionType.createUnionType union
-
---         output =
---             [ UnionType.createTypeFromString type_
---             , UnionType.createDecoder type_
---             , UnionType.createEncoder type_
---             ]
---                 |> String.join "\n\n"
---     in
---         Html.textarea
---             [ value <| output
---             , class [ Output ]
---             , spellcheck False
---             ]
---             []
-
-
 viewInput : String -> Html Action
 viewInput alias =
     Html.textarea
@@ -138,33 +117,8 @@ viewInput alias =
         , style "width" "40%"
         , spellcheck False
         , placeholder "Put a valid JSON object in here!"
-        -- , placeholder "Put a valid JSON object in here! Now try a type alias, an union type, or an old-style decoder!"
         ]
         [ Html.text <| alias ]
-
-
--- radio : (a -> Action) -> a -> a -> String -> Html Action
--- radio onUpdate selected decoder name =
---     span []
---         [ input
---             [ type_ "radio"
---             , Html.Attributes.checked (selected == decoder)
---             , onChange (onUpdate decoder)
---             ]
---             []
---         , Html.text name
---         ]
-
-
--- viewDecoderTypeInput : DecoderType -> Html Action
--- viewDecoderTypeInput decoder =
---     div
---         []
---         [ Html.text "Decoder type: "
---         , radio UpdateDecoder decoder Original "original"
---         , radio UpdateDecoder decoder Pipeline "pipeline"
---         , radio UpdateDecoder decoder English "English"
---         ]
 
 
 viewErrors : List String -> Html Action
@@ -212,18 +166,6 @@ view model =
                 JsonBlob ->
                     [ viewAllAliases model.elmVersion model.input model.decoderType model.aliases
                     ]
-
-                -- TypeAliasType ->
-                --     [ viewTypeAliasStuff model.elmVersion model.input
-                --     ]
-
-                -- UnionType ->
-                --     [ viewAllUnions model.input
-                --     ]
-
-                -- DecoderString ->
-                --     [ viewAllDecoder model.elmVersion model.decoderType model.input
-                --     ]
     in
         div
             [
@@ -233,7 +175,6 @@ view model =
             , case model.inputType of
             JsonBlob ->
                 viewNameSelect model.name
-        --  , viewDecoderTypeInput model.decoderType
             , div
                 [ style "height" "500px"
                 , style "width" "100%"
@@ -252,39 +193,23 @@ type alias Field =
     }
 
 
-type alias Stuff =
-    { stuff : Json.Value
-    , fields : List Field
-    }
-
-
 type Action
     = UpdateInput String
     | UpdateName String
-    -- | UpdateDecoder DecoderType
     | Noop
-    | UpdateValue Stuff
+    | UpdateFields (List Field)
 
 
 type InputType
     = JsonBlob
-    -- = TypeAliasType
-    -- | UnionType
-    -- | JsonBlob
-    -- | DecoderString
 
 
 type DecoderType
     = Pipeline
-    -- = Original
-    -- | Pipeline
-    -- | English
 
 
 type ElmVersion
-    = O18
-    -- = O17
-    -- | O18
+    = O19
 
 
 type alias Model =
@@ -302,34 +227,38 @@ subscriptions : Model -> Sub Action
 subscriptions model =
     Sub.batch
         [ Sub.none
-        , updateValue UpdateValue
+        , updateFields UpdateFields
         ]
 
 
-port toValue : Json.Value -> Cmd msg
+port parse : Json.Value -> Cmd msg
 
 
-port updateValue : (Stuff -> msg) -> Sub msg
+port updateFields : (List Field -> msg) -> Sub msg
 
 
 update : Action -> Model -> ( Model, Cmd Action )
 update action model =
     case action of
         Noop ->
-            ( model, Cmd.none )
+            ( model
+            , Cmd.none
+            )
 
-        UpdateValue { stuff, fields } ->
-            ( { model | aliases = List.map (\field ->
-                    { base = field.base
-                    , name = field.name
-                    , typeName = field.typeName
-                        |> Types.typeToKnownTypes
-                    , value = field.value
-                    }
-                ) fields
-                    |> TypeAlias.createTypeAliases stuff
+        UpdateFields fields ->
+            ( { model | aliases =
+                TypeAlias.createTypeAliases
+                    <| List.map (\field ->
+                        { base = field.base
+                        , name = field.name
+                        , typeName = field.typeName
+                            |> Types.typeToKnownTypes
+                        , value = field.value
+                        }
+                    ) fields
             }
-            , Cmd.none )
+            , Cmd.none
+            )
 
         UpdateInput input ->
             case String.trim input of
@@ -339,36 +268,17 @@ update action model =
                     )
             
                 trimmed ->
-                    ( { model
-                        | input = trimmed
-                        -- , inputType =
-                        --     if TypeAlias.isUnionType trimmed then
-                        --         UnionType
-                        --     else if TypeAlias.isTypeAlias trimmed then
-                        --         TypeAliasType
-                        --     else if TypeAlias.isDecoder trimmed then
-                        --         DecoderString
-                        --     else
-                        --         JsonBlob
-                    }
-                -- , mapPort <| E.object
-                --     [ ("Cmd", E.string "Fly")
-                --     , ("lon", lonLatValue "lon" model)
-                --     , ("lat", lonLatValue "lat" model)
-                --     , ("zoom", E.float model.zoom)
-                --     , ("geoJson", geoJsonValue model)
-                --     ]
-                    , toValue <| Json.object
+                    ( { model | input = trimmed }
+                    , parse <| Json.object
                         [ ( "aliasName", Json.string model.name )
                         , ( "text", Json.string trimmed )
                         ]
                     )
 
         UpdateName name ->
-            ( { model | name = name }, Cmd.none )
-
-        -- UpdateDecoder decoder ->
-        --     ( { model | decoderType = decoder }, Cmd.none )
+            ( { model | name = name }
+            , Cmd.none
+            )
 
 
 defaultModel : Model
@@ -378,6 +288,6 @@ defaultModel =
     , errors = []
     , inputType = JsonBlob
     , decoderType = Pipeline
-    , elmVersion = O18
+    , elmVersion = O19
     , aliases = []
     }
