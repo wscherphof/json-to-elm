@@ -1,6 +1,6 @@
 {
-  "short_name": "Elm App",
-  "name": "Create Elm App Sample",
+  "short_name": "json-to-elm",
+  "name": "Generate JSON decoders and encoders for Elm",
   "icons": [
     {
       "src": "favicon.ico",

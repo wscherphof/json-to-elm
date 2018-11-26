@@ -1,8 +1,0 @@
-{
-  "name": "Noah",
-  "age" : 23,
-  "location" : {
-    "name" : "Sweden",
-    "days" : 15.5
-  }
-}
