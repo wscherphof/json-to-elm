@@ -1,0 +1,25 @@
+{
+  "name": "json-to-elm",
+  "version": "1.0.0",
+  "description": "Generate JSON decoders and encoders for Elm",
+  "main": "index.js",
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/wscherphof/json-to-elm.git"
+  },
+  "author": "",
+  "license": "SEE LICENSE IN LICENSE",
+  "bugs": {
+    "url": "https://github.com/wscherphof/json-to-elm/issues"
+  },
+  "homepage": "https://github.com/wscherphof/json-to-elm#readme",
+  "devDependencies": {
+    "create-elm-app": "^2.2.3"
+  }
+}
